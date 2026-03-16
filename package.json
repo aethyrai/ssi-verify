@@ -1,0 +1,42 @@
+{
+  "name": "@aethyrai/ssi-verify",
+  "version": "0.1.0",
+  "description": "Lightweight SSI credential and signature verification",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "npx @biomejs/biome check .",
+    "lint:fix": "npx @biomejs/biome check --write ."
+  },
+  "dependencies": {
+    "@noble/post-quantum": "^0.5.4",
+    "@noble/hashes": "^1.7.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aethyrai/ssi-verify.git"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
