@@ -1,22 +1,26 @@
 # @aethyrai/ssi-verify
 
-Verify AI agent identity and capabilities. Lightweight, embeddable, post-quantum.
+Verify AI agent identity. Lightweight, embeddable, post-quantum.
 
-## The Problem
+## Why This Exists
 
-AI agents are showing up at APIs, tools, and services — but there's no standard way to verify who they are or what they're allowed to do. Today, 93% of agent deployments rely on shared API keys. 68% of organizations can't distinguish agent actions from human activity. No major agent framework — LangChain, CrewAI, OpenAI, Anthropic, Google ADK — provides per-agent cryptographic identity.
+Autonomous agents are about to walk the streets. They'll book hotel rooms, sign contracts, access medical records, make purchases, and interact with systems on behalf of real people and companies. Every system they touch needs to answer the same question: **who is this agent, who sent it, and what is it allowed to do?**
 
-As agents become more autonomous, "trust me, I'm an agent" isn't good enough.
+Today there's no answer. 93% of agent deployments use shared API keys. 68% of organizations can't tell agent actions apart from human activity. No major agent framework provides per-agent cryptographic identity. When an agent misbehaves, there's no way to trace it back to a responsible party without taking everyone else down with it.
 
-## The Solution
+That's not a technical inconvenience. It's a blocker for agents operating in the real world. Without verifiable identity, autonomous agents can't be trusted, regulated, or insured.
 
-Aethyr provides verifiable identity for AI agents — like a certificate authority, but for agents instead of websites. An agent registers with Aethyr, receives a signed credential with specific capabilities, and presents that credential to any service it interacts with. The receiving service uses `ssi-verify` to check: is this agent's identity legitimate? Is the credential expired? Does this agent have permission to do what it's asking?
+## What This Library Does
 
-No shared API keys. No blockchain. No ecosystem lock-in. Just cryptographic proof that an agent is who it claims to be.
+This is the verification side. When an agent presents a credential to your service, `ssi-verify` checks three things:
 
-## Why Post-Quantum
+1. **Is the credential authentic?** — cryptographic signature verification (ML-DSA-65, post-quantum)
+2. **Is it still valid?** — expiry checking
+3. **Is the agent authorized?** — capability matching against what the credential grants
 
-Every other agent identity solution uses classical cryptography (Ed25519, RSA, secp256k1). Aethyr uses **ML-DSA-65** (NIST FIPS 204) — a post-quantum signature algorithm. Agent credentials issued today may still be in circulation when quantum computers can break classical signatures. We're not waiting for that to become a problem.
+No network calls. No Aethyr account needed. No API keys. Just math running locally in your service. Install from npm and verify.
+
+The credential itself is issued by Aethyr — the trust authority. Think of Aethyr as the DMV for AI agents. The agent gets a license. Your service checks the license. This library is the scanner at the door.
 
 ## Install
 
@@ -53,8 +57,8 @@ const actionResult = verifyAction(signedAction, signerPublicKey);
 const valid = verify(publicKey, data, signature);
 
 // Parse an agent's DID
-const parsed = parseDID('did:aethyr:console:abc123');
-// { namespace: 'console', identifier: 'abc123' }
+const parsed = parseDID('did:aethyr:agent:abc123');
+// { namespace: 'agent', identifier: 'abc123' }
 ```
 
 ## How It Works
@@ -69,15 +73,21 @@ const parsed = parseDID('did:aethyr:console:abc123');
       └──────────────────────────────────────────┘
                                                   │
                                           ssi-verify checks:
-                                          ✓ signature valid?
-                                          ✓ credential expired?
-                                          ✓ capabilities match?
+                                          ✓ authentic?
+                                          ✓ still valid?
+                                          ✓ authorized?
 ```
 
 1. **Agent registers** with Aethyr and receives a signed credential
-2. **Agent presents** the credential to your service
-3. **Your service verifies** using `ssi-verify` and Aethyr's public key
-4. **Your service checks capabilities** to decide what the agent can do
+2. **Agent presents** the credential when it interacts with your service
+3. **Your service verifies** using `ssi-verify` — no network call, fully offline
+4. **Your service decides** what the agent can do based on its capabilities
+
+Every credential traces back to a responsible party. If the agent causes harm, you know who deployed it, what it was authorized to do, and who to contact. That's what makes autonomous agents legal, trustworthy, and insurable.
+
+## Why Post-Quantum
+
+Every other agent identity solution uses classical cryptography (Ed25519, RSA, secp256k1). Aethyr uses **ML-DSA-65** (NIST FIPS 204) — a post-quantum signature algorithm. Agent credentials issued today may still be in circulation when quantum computers can break classical signatures. We're not waiting for that to become a problem.
 
 ## Cryptography
 
@@ -125,5 +135,5 @@ See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
 ## Related
 
-- [`@aethyrai/ssi`](https://github.com/aethyrai/ssi) — Full SSI protocol: identity, credentials, signing, key hierarchy
 - [Aethyr](https://aethyr.ai) — Trust infrastructure for AI agents
+- [Agent Registry](https://registry.aethyr.cloud) — Register your agent and get a credential
