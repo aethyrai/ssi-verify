@@ -97,6 +97,21 @@ describe('ssi-verify', () => {
       expect(result.valid).toBe(false);
       expect(result.reason).toContain('Unsupported proof type');
     });
+
+    it('rejects expired credential', () => {
+      const cred = makeTestCredential(signingKeypair.secretKey, issuerDid);
+      cred.expirationDate = new Date(Date.now() - 1000).toISOString();
+      const result = verifyCredential(cred, signingKeypair.publicKey);
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Credential has expired');
+    });
+
+    it('rejects tampered credential body', () => {
+      const cred = makeTestCredential(signingKeypair.secretKey, issuerDid);
+      cred.credentialSubject.capabilities = ['*'];
+      const result = verifyCredential(cred, signingKeypair.publicKey);
+      expect(result.valid).toBe(false);
+    });
   });
 
   describe('verifyAction', () => {
@@ -111,7 +126,7 @@ describe('ssi-verify', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('wrong key fails', () => {
+    it('wrong key fails with reason', () => {
       const wrongMaterial = deriveSigningMaterial(new Uint8Array(32).fill(99));
       const wrongKeypair = ml_dsa65.keygen(wrongMaterial);
 
@@ -123,6 +138,7 @@ describe('ssi-verify', () => {
         wrongKeypair.publicKey,
       );
       expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Invalid signature');
     });
   });
 
@@ -145,6 +161,12 @@ describe('ssi-verify', () => {
       expect(parseDID('did:other:method:id')).toBeNull();
       expect(parseDID('did:aethyr')).toBeNull();
     });
+
+    it('returns null for empty segments', () => {
+      expect(parseDID('did:aethyr::')).toBeNull();
+      expect(parseDID('did:aethyr:console:')).toBeNull();
+      expect(parseDID('did:aethyr::abc123')).toBeNull();
+    });
   });
 
   describe('capability matching', () => {
@@ -158,6 +180,19 @@ describe('ssi-verify', () => {
         true,
       );
       expect(matchCapabilities(['tool:hubspot_*'], 'tool:jobtread_list')).toBe(false);
+    });
+
+    it('empty capabilities array returns false', () => {
+      expect(matchCapabilities([], 'tool:anything')).toBe(false);
+    });
+
+    it('exact match works without wildcard', () => {
+      expect(matchCapability('tool:hubspot_search', 'tool:hubspot_search')).toBe(true);
+      expect(matchCapability('tool:hubspot_search', 'tool:hubspot_create')).toBe(false);
+    });
+
+    it('universal wildcard matches everything', () => {
+      expect(matchCapability('*', 'tool:anything')).toBe(true);
     });
   });
 });

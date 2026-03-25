@@ -103,7 +103,10 @@ export function verifyAction(
 ): VerificationResult {
   try {
     const valid = ml_dsa65.verify(signedAction.signature, signedAction.payload, signingPublicKey);
-    return { valid };
+    if (!valid) {
+      return { valid: false, reason: 'Invalid signature' };
+    }
+    return { valid: true };
   } catch {
     return { valid: false, reason: 'Signature verification failed' };
   }
@@ -131,7 +134,7 @@ export function verify(publicKey: Uint8Array, data: Uint8Array, signature: Uint8
 
 /**
  * Check if a granted capability matches a requested operation.
- * Supports glob-style wildcards.
+ * Supports trailing wildcards (e.g., "tool:hubspot_*").
  *
  * @param granted - The capability string from a credential (e.g., "tool:hubspot_*")
  * @param requested - The operation being requested (e.g., "tool:hubspot_create_contact")
@@ -172,7 +175,7 @@ export function matchCapabilities(granted: string[], requested: string): boolean
  */
 export function parseDID(did: string): { namespace: string; identifier: string } | null {
   const parts = did.split(':');
-  if (parts.length !== 4 || parts[0] !== 'did' || parts[1] !== 'aethyr') {
+  if (parts.length !== 4 || parts[0] !== 'did' || parts[1] !== 'aethyr' || !parts[2] || !parts[3]) {
     return null;
   }
   return { namespace: parts[2], identifier: parts[3] };
