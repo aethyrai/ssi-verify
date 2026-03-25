@@ -3,5 +3,6 @@ dist/
 *.tsbuildinfo
 .env
 .env.local
+.npmrc
 CLAUDE.md
 .claude/
