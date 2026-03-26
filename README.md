@@ -135,5 +135,5 @@ See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
 ## Related
 
-- [Aethyr](https://aethyr.ai) — Trust infrastructure for AI agents
+- [Aethyr Research](https://aethyrresearch.com) — Trust infrastructure for AI agents
 - [Agent Registry](https://registry.aethyr.cloud) — Register your agent and get a credential
