@@ -4,6 +4,9 @@ import { blake3 } from '@noble/hashes/blake3.js';
 import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import { describe, expect, it } from 'vitest';
 import {
+  AETHYR_ISSUER_DID,
+  AETHYR_ISSUER_PUBLIC_KEY,
+  checkRevocationStatus,
   matchCapabilities,
   matchCapability,
   parseDID,
@@ -193,6 +196,22 @@ describe('ssi-verify', () => {
 
     it('universal wildcard matches everything', () => {
       expect(matchCapability('*', 'tool:anything')).toBe(true);
+    });
+  });
+
+  describe('trust authority exports', () => {
+    it('AETHYR_ISSUER_PUBLIC_KEY is a 1952-byte Uint8Array', () => {
+      expect(AETHYR_ISSUER_PUBLIC_KEY).toBeInstanceOf(Uint8Array);
+      expect(AETHYR_ISSUER_PUBLIC_KEY.length).toBe(1952);
+    });
+
+    it('AETHYR_ISSUER_DID has correct format', () => {
+      expect(AETHYR_ISSUER_DID).toMatch(/^did:aethyr:authority:[a-f0-9]{64}$/);
+    });
+
+    it('checkRevocationStatus returns null for non-existent credential', async () => {
+      const result = await checkRevocationStatus('nonexistent', 'http://localhost:99999');
+      expect(result).toBeNull();
     });
   });
 });

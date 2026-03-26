@@ -1,6 +1,6 @@
 {
   "name": "@aethyrai/ssi-verify",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lightweight SSI credential and signature verification",
   "type": "module",
   "main": "dist/index.js",
